@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  location    String?
+  eventType   String   // workshop, conference, training, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  cycles      EventCycle[]
+  metrics     EventMetric[]
+  participants EventParticipant[]
+
+  @@map("events")
+}
+
+model EventCycle {
+  id        String   @id @default(cuid())
+  eventId   String
+  name      String   // e.g., "Q1 2024", "January Cycle"
+  startDate DateTime
+  endDate   DateTime
+  status    CycleStatus @default(PLANNING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  event        Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  participants EventParticipant[]
+  responses    FormResponse[]
+  evaluationSurveyResponses EvaluationSurveyResponse[]
+  metrics      CycleMetric[]
+
+  @@map("event_cycles")
+}
+
+model EventParticipant {
+  id         String   @id @default(cuid())
+  eventId    String
+  cycleId    String?
+  email      String
+  name       String
+  department String?
+  role       String?
+  registeredAt DateTime @default(now())
+  attended   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  event     Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  cycle     EventCycle? @relation(fields: [cycleId], references: [id])
+  responses FormResponse[]
+
+  @@unique([eventId, email])
+  @@map("event_participants")
+}
+
+model FormResponse {
+  id            String   @id @default(cuid())
+  cycleId       String
+  participantId String
+  responseData  Json     // Store all form responses as JSON
+  submittedAt   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  cycle       EventCycle       @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  participant EventParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@map("form_responses")
+}
+
+model EvaluationSurveyResponse {
+  id                     String   @id @default(cuid())
+  cycleId                String
+  role                   String
+  university             String
+  planning               Int      // Q2 - The planning of the event (1-5)
+  localStaff             Int      // Q3 - Help from local staff (1-5)
+  sendingInstitution     Int      // Q4 - Help from sending institution (1-5)
+  accommodationTravel    Int      // Q5 - Accommodation and traveling (1-5)
+  programme              Int      // Q6 - The EGALITARIAN programme (1-5)
+  culturalTour           Int      // Q7 - Cultural tour (1-5)
+  overallSatisfaction    Int      // Q8 - Overall satisfaction (1-5)
+  preparedness           Int      // Q9 - How prepared they felt (1-5)
+  comments               String?
+  createdAt              DateTime @default(now())
+
+  // Relations
+  cycle EventCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  @@map("evaluation_survey_responses")
+}
+
+model EventMetric {
+  id          String     @id @default(cuid())
+  eventId     String
+  name        String     // e.g., "Satisfaction Score", "Engagement Rate"
+  description String?
+  metricType  MetricType
+  unit        String?    // %, points, count, etc.
+  targetValue Float?     // Target/goal value
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  event        Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  cycleMetrics CycleMetric[]
+
+  @@map("event_metrics")
+}
+
+model CycleMetric {
+  id        String   @id @default(cuid())
+  cycleId   String
+  metricId  String
+  value     Float
+  calculatedAt DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  cycle  EventCycle  @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  metric EventMetric @relation(fields: [metricId], references: [id], onDelete: Cascade)
+
+  @@unique([cycleId, metricId])
+  @@map("cycle_metrics")
+}
+
+model FeedbackAnalysis {
+  id          String   @id @default(cuid())
+  cycleId     String?
+  eventId     String?
+  textContent String   // Raw feedback text
+  sentiment   String?  // positive, negative, neutral
+  keywords    String[] // Extracted keywords for word cloud
+  score       Float?   // Sentiment score
+  category    String?  // Categorized feedback type
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feedback_analysis")
+}
+
+model ImprovementPoint {
+  id          String            @id @default(cuid())
+  eventId     String?
+  cycleId     String?
+  title       String
+  description String
+  category    String            // process, content, logistics, etc.
+  priority    Priority          @default(MEDIUM)
+  status      ImprovementStatus @default(IDENTIFIED)
+  assignedTo  String?
+  dueDate     DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("improvement_points")
+}
+
+// Enums
+enum CycleStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum MetricType {
+  SATISFACTION
+  ENGAGEMENT
+  LEARNING_OUTCOME
+  ATTENDANCE
+  COMPLETION_RATE
+  NPS_SCORE
+  CUSTOM
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ImprovementStatus {
+  IDENTIFIED
+  IN_PROGRESS
+  COMPLETED
+  DEFERRED
+} 
