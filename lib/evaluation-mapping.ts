@@ -55,6 +55,7 @@ export function transformRow(row: RawSurveyRow) {
   ].filter(text => text.trim()).join(' ');
 
   return {
+    sourceId: null,
     role: row.role,
     university: row.university,
     planning: ratingToNumber(row.planning),

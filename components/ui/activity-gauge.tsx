@@ -79,11 +79,11 @@ export function ActivityGauge({
         
         {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className={`font-bold ${config.fontSize} ${getMetricColor(value, target)}`}>
+          <div className={`font-bold ${config.fontSize} text-gray-900`}>
             {formatMetricValue(value, unit)}
           </div>
           {showTarget && (
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-900 font-semibold">
               of {formatMetricValue(target, unit)}
             </div>
           )}
@@ -91,16 +91,16 @@ export function ActivityGauge({
       </div>
       
       {/* Title */}
-      <div className={`text-center font-medium ${config.titleSize} text-gray-700`}>
+      <div className={`text-center font-medium ${config.titleSize} text-gray-900`}>
         {title}
       </div>
       
       {/* Percentage indicator */}
       <div className="flex items-center space-x-2">
-        <div className={`text-xs font-medium ${getMetricColor(value, target)}`}>
+        <div className="text-xs font-bold text-gray-900">
           {percentage.toFixed(1)}%
         </div>
-        <div className="text-xs text-gray-400">of target</div>
+        <div className="text-xs text-gray-900 font-semibold">of target</div>
       </div>
     </div>
   )

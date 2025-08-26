@@ -61,7 +61,7 @@ export function WordCloud({
       .padding(padding)
       .rotate(() => (Math.random() - 0.5) * 60)
       .font('Arial')
-      .fontSize(d => d.size)
+      .fontSize((d: any) => Number(d.size) || 12)
       .on('end', draw)
 
     layout.start()
@@ -106,7 +106,7 @@ export function WordCloud({
       <svg ref={svgRef} className="border border-gray-200 rounded-lg" />
       
       {/* Legend */}
-      <div className="flex items-center space-x-4 mt-4 text-sm">
+      <div className="flex items-center space-x-4 mt-4 text-sm text-gray-900 font-semibold">
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 rounded-full bg-green-500" />
           <span>Positive</span>

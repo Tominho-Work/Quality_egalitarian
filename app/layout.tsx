@@ -5,9 +5,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Event Performance Tracker',
-  description: 'Track and analyze event performance metrics, participant feedback, and improvement points across different event cycles.',
-  keywords: ['event management', 'performance tracking', 'analytics', 'metrics'],
+  title: 'EGALITARIAN Analytics',
+  description: 'Simple insights from EGALITARIAN cycles: evaluation surveys and proposals feedback.',
+  keywords: ['egalitarian', 'analytics', 'evaluation', 'proposals', 'sdg'],
 }
 
 export default function RootLayout({

@@ -44,6 +44,7 @@ model EventCycle {
   participants EventParticipant[]
   responses    FormResponse[]
   evaluationSurveyResponses EvaluationSurveyResponse[]
+  proposalPresentationFeedbacks ProposalPresentationFeedback[]
   metrics      CycleMetric[]
 
   @@map("event_cycles")
@@ -90,6 +91,7 @@ model FormResponse {
 model EvaluationSurveyResponse {
   id                     String   @id @default(cuid())
   cycleId                String
+  sourceId               String?
   role                   String
   university             String
   planning               Int      // Q2 - The planning of the event (1-5)
@@ -107,6 +109,7 @@ model EvaluationSurveyResponse {
   cycle EventCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
 
   @@map("evaluation_survey_responses")
+  @@unique([cycleId, sourceId])
 }
 
 model EventMetric {
@@ -175,6 +178,24 @@ model ImprovementPoint {
   updatedAt   DateTime          @updatedAt
 
   @@map("improvement_points")
+}
+
+model ProposalPresentationFeedback {
+  id                      String   @id @default(cuid())
+  cycleId                 String
+  sourceId                String
+  program                 String   // Program/Project name (e.g., Educado, Ecolink, etc.)
+  impact                  Int      // Does the proposal intend to create the expected impact? (1-5)
+  digitalTransformation   Int      // Does the proposal intend to create digital solutions and develop competences? (1-5)
+  clarity                 Int      // Is the proposal clear and detailed? (1-5)
+  comments                String?
+  createdAt               DateTime @default(now())
+
+  // Relations
+  cycle EventCycle @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+  @@map("proposal_presentation_feedback")
+  @@unique([cycleId, sourceId])
 }
 
 // Enums

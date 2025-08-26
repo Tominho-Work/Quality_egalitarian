@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     if (role) whereClause.role = role;
     if (university) whereClause.university = university;
 
-    // Get all survey responses
+    // Get all survey responses (respecting all selected filters)
     const responses = await prisma.evaluationSurveyResponse.findMany({
       where: whereClause,
       include: {
@@ -59,8 +59,8 @@ export async function GET(req: NextRequest) {
         roles: uniqueRoles.map(r => r.role),
         universities: uniqueUniversities.map(u => u.university),
         metrics: {
-          overallSatisfaction: { value: 0, target: 4.4, count: 0 },
-          preparedness: { value: 0, target: 4.4, count: 0 },
+          overallSatisfaction: { value: 0, target: 4.0, count: 0 },
+          preparedness: { value: 0, target: 4.0, count: 0 },
         },
         questionAverages: {},
         wordCloudData: [],
@@ -138,6 +138,55 @@ export async function GET(req: NextRequest) {
       return acc;
     }, {} as Record<string, number>);
 
+    // Overall trend by cycle (ignores cycleId filter, but applies other filters)
+    const trendWhere: any = { ...whereClause };
+    delete trendWhere.cycleId;
+
+    const trendResponses = await prisma.evaluationSurveyResponse.findMany({
+      where: trendWhere,
+      select: {
+        cycleId: true,
+        planning: true,
+        localStaff: true,
+        sendingInstitution: true,
+        accommodationTravel: true,
+        programme: true,
+        culturalTour: true,
+        overallSatisfaction: true,
+      },
+    });
+
+    const perCycleAggregation = trendResponses.reduce((acc: Record<string, { sum: number; count: number }>, r) => {
+      const values = [
+        r.planning,
+        r.localStaff,
+        r.sendingInstitution,
+        r.accommodationTravel,
+        r.programme,
+        r.culturalTour,
+        r.overallSatisfaction,
+      ];
+      let sum = 0;
+      let count = 0;
+      values.forEach(v => {
+        const value = v || 0;
+        if (value > 0) {
+          sum += value;
+          count += 1;
+        }
+      });
+      if (!acc[r.cycleId]) acc[r.cycleId] = { sum: 0, count: 0 };
+      acc[r.cycleId].sum += sum;
+      acc[r.cycleId].count += count;
+      return acc;
+    }, {});
+
+    const overallTrend = cycles.map(cycle => {
+      const agg = perCycleAggregation[cycle.id] || { sum: 0, count: 0 };
+      const avg = agg.count > 0 ? Math.round((agg.sum / agg.count) * 100) / 100 : 0;
+      return { cycle: cycle.name, value: avg };
+    });
+
     return NextResponse.json({
       cycles,
       roles: uniqueRoles.map(r => r.role),
@@ -145,12 +194,12 @@ export async function GET(req: NextRequest) {
       metrics: {
         overallSatisfaction: { 
           value: Math.round(overallSatisfactionAvg * 100) / 100, 
-          target: 4.4, 
+          target: 4.0, 
           count: responses.length 
         },
         preparedness: { 
           value: Math.round(preparednessAvg * 100) / 100, 
-          target: 4.4, 
+          target: 4.0, 
           count: responses.length 
         },
       },
@@ -158,6 +207,7 @@ export async function GET(req: NextRequest) {
       wordCloudData,
       demographics,
       totalResponses: responses.length,
+      overallTrend,
     });
 
   } catch (error) {

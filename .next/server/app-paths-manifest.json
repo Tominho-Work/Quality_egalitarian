@@ -1,0 +1,6 @@
+{
+  "/proposals-feedback/page": "app/proposals-feedback/page.js",
+  "/page": "app/page.js",
+  "/api/evaluation-survey/analytics/route": "app/api/evaluation-survey/analytics/route.js",
+  "/evaluation-survey/page": "app/evaluation-survey/page.js"
+}

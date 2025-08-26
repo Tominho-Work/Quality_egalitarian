@@ -78,7 +78,7 @@ export function KPIDonutChart({
       return (
         <div className="bg-white p-3 shadow-lg rounded-lg border">
           <p className="font-medium">{data.name}</p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-900">
             {formatMetricValue(data.value, unit)} ({data.percentage.toFixed(1)}%)
           </p>
         </div>
@@ -113,18 +113,15 @@ export function KPIDonutChart({
         {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <div className="text-center">
-            <div 
-              className="text-2xl font-bold"
-              style={{ color: getValueColor() }}
-            >
+            <div className="text-2xl font-extrabold text-gray-900">
               {formatMetricValue(value, unit)}
             </div>
             {showPercentage && (
-              <div className="text-sm text-gray-500 mt-1">
+              <div className="text-sm text-gray-900 font-bold mt-1">
                 {percentage.toFixed(1)}%
               </div>
             )}
-            <div className="text-xs text-gray-400 mt-1">
+            <div className="text-xs text-gray-900 font-semibold mt-1">
               Target: {formatMetricValue(target, unit)}
             </div>
           </div>
@@ -133,11 +130,11 @@ export function KPIDonutChart({
       
       {/* Title */}
       <div className="text-center">
-        <h3 className="font-medium text-gray-800">{title}</h3>
+        <h3 className="font-semibold text-gray-900">{title}</h3>
       </div>
       
       {/* Threshold indicators */}
-      <div className="flex items-center space-x-4 text-xs">
+      <div className="flex items-center space-x-4 text-xs text-gray-900 font-semibold">
         <div className="flex items-center space-x-1">
           <div 
             className="w-3 h-3 rounded-full"

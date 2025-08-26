@@ -1,0 +1,128 @@
+---
+description: XLSX files structure for each cycle and survey
+alwaysApply: false
+---
+Event Evaluation Survey
+    Cycle 1
+        Not available
+    Cycle 2
+        Column A
+            ID (No aditional info required) - Starting at 1 and increasing
+        Column B
+            Start time (Date and hour format, all filled on 8/30/24 for this cycle) - Example (8/30/24 8:58:06)
+        Column C
+            Completion time (Date and hour format, all filled on 8/30/24 for this cycle) - Same format as Column B
+        Column D
+            Email (No aditional info required) - All marked as "anonymous"
+        Column E
+            Name (No aditional info required) - All blank
+        Column F
+            Last modified time (No aditional info required) - All blank
+        Column G
+            You are a (So we can identify witch group filled) - The options are "Student", "Supervisor", "Management Team", "Professor"
+        Column H
+            Your university (So we can identify from witch university they are and use as a filter) - The options are "University of Brasília", "University of Minho", "Aalborg University", "Saxion University"
+        Column I
+            '2 (The planing of the event) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column J
+            '3 (The help from staff) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column K
+            '4 (The help from university) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column L
+            '5 (Accommodation and travelling) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column M
+            '6 (The EGALITARIAN programme) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column N
+            '7 (The cultural tour) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column O
+            '8 (Overral satisfaction) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column P
+            '9 (How preppared are you feeling) - The options are "Did not prepare at all", "Prepared very little", "Prepared a little", "Prepared reasonably well", "Prepared very well" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column Q
+           " Add comments below to help us understand what you liked and what we can improve in the Egalitarian event (Optional)" - Free text (Used to generate the word cloud)
+    Cycle 3
+        Column A
+            ID (No aditional info required) - Starting at 1 and increasing
+        Column B
+            Start time (Date and hour format, all filled on 1/31/25 for this cycle) - Example (1/31/25 15:50:18)
+        Column C
+            Completion time (Date and hour format, all filled on 1/31/25 for this cycle) - Same format as Column B
+        Column D
+            Email (No aditional info required) - All marked as "anonymous"
+        Column E
+            Name (No aditional info required) - All blank
+        Column F
+            Last modified time (No aditional info required) - All blank
+        Column G
+            You are a (So we can identify witch group filled) - The options are "Student", "Supervisor", "Management Team", "Professor", "staff" (One filled "Werewolf" as a joke)
+        Column H
+            Your university (So we can identify from witch university they are and use as a filter) - The options are "University of Brasília", "University of Minho", "Aalborg University", "Saxion University"
+        Column I
+            '2 (The planing of the event) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column J
+            '3 (The help from staff) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column K
+            '4 (The help from university) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column L
+            '5 (Accommodation and travelling) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column M
+            '6 (The EGALITARIAN programme) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column N
+            '7 (Overral satisfaction) - The options are "Very dissatisfied", "dissatisfied", "Neither dissatisfied nor Satisfied", "Satisfied", "Very Satisfied" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column O
+            '8 (How preppared are you feeling) - The options are "Did not prepare at all", "Prepared very little", "Prepared a little", "Prepared reasonably well", "Prepared very well" (They need to be converted to numeric from 1 to 5 following the order so we can use as a metric to gather results and understand the average)
+        Column P
+            "Please share with us what was the most memorable moment on the event this week in your opinion (we will share this on our social media anonimously, unless you want us to share your names as well)" - Free text (Used to generate the word cloud)
+        Column Q
+            "If you want to share your name so we can post your favorite moment on social media with your name related to it just write your name here, or just write no if you do not want to share your name" - names (Not necessary to track or do anything with this)
+        Column R
+           "Add comments below to help us understand what you liked and what we can improve in the Egalitarian event (Optional)" - Free text (Used to generate the word cloud)
+Proposals presentation feedback
+    Cycle 3
+        Not available
+    Cycle 2
+        Column A
+            ID - From 1 to "n"
+        Column B
+            Start time (Date and hour format, all filled on 8/30/24 for this cycle) - Example (8/30/24 5:59:38)
+        Column C
+            Start time (Date and hour format, all filled on 8/30/24 for this cycle) - Example (8/30/24 6:01:56)
+        Column D
+            Email - All marked as anonymous
+        Column E
+            Name - All blank
+        Column F
+            Last modified date - All blank
+        Column G
+            Program - Chose 1 of the projects (Educado, PUMA Indicators, Data Management System, Carbon Footprint)
+        Column H
+            "Does the proposal intends to create the  expected  impact? (Note: a framework of good practices to solve major environmental and social issues related to waste, dumpsites and waste pickers, throug...)" - From 1 to 5
+        Column I
+            "Does the proposal intends to create digital solutions to the problems and promote digital transformation in the regions targeted, and, simultaneously, develop digital competences in the students?" - From 1 to 5
+        Column J
+            "Does the proposal is clear and detailed in terms of objectives, timeline,  organization, future work plan among others?" - From 1 to 5
+        Column K
+            "Comments and recommendations for the team progress." - Free text, can be used as a word cloud
+    Cycle 3
+            Column A
+            ID - From 1 to "n"
+        Column B
+            Start time (Date and hour format, all filled on 8/30/24 for this cycle) - Example (8/30/24 5:59:38)
+        Column C
+            Start time (Date and hour format, all filled on 8/30/24 for this cycle) - Example (8/30/24 6:01:56)
+        Column D
+            Email - All marked as anonymous
+        Column E
+            Name - All blank
+        Column F
+            Last modified date - All blank
+        Column G
+            Program - Chose 1 of the projects (Educado, Ecolink, Data Management System, Carbon Footprint)
+        Column H
+            "Does the proposal intends to create the  expected  impact? (Note: a framework of good practices to solve major environmental and social issues related to waste, dumpsites and waste pickers, throug...)" - From 1 to 5
+        Column I
+            "Does the proposal intends to create digital solutions to the problems and promote digital transformation in the regions targeted, and, simultaneously, develop digital competences in the students?" - From 1 to 5
+        Column J
+            "Does the proposal is clear and detailed in terms of objectives, timeline,  organization, future work plan among others?" - From 1 to 5
+        Column K
+            "Comments and recommendations for the team progress." - Free text, can be used as a word cloud

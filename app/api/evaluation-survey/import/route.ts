@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import ExcelJS from "exceljs";
+import * as XLSX from "xlsx";
 import { RawSurveyRow, transformRow } from "@/lib/evaluation-mapping";
+
+export const runtime = "nodejs";
 
 function parseExcelDate(value: any): Date | null {
   if (value instanceof Date) return value;
@@ -28,23 +30,33 @@ export async function POST(req: NextRequest) {
   }
 
   const arrayBuffer = await file.arrayBuffer();
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(arrayBuffer);
-  const worksheet = workbook.worksheets[0];
+  const buffer = Buffer.from(arrayBuffer);
+  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const firstSheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[firstSheetName];
+  const rows: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, defval: "" });
 
   // Determine column indices by header row (assumes first row headers)
-  const headerRow = worksheet.getRow(1);
+  const headerRow = rows[0] || [];
   const headerMap: Record<string, number> = {};
-  headerRow.eachCell((cell, colNumber) => {
-    const headerText = String(cell.text).toLowerCase().trim();
-    headerMap[headerText] = colNumber;
-    console.log(`Column ${colNumber}: "${headerText}"`);
+  headerRow.forEach((cellValue: any, colIndex: number) => {
+    const headerText = String(cellValue ?? "").toLowerCase().trim();
+    if (headerText) {
+      // store as 0-based index
+      headerMap[headerText] = colIndex;
+      console.log(`Column ${colIndex + 1}: "${headerText}"`);
+    }
   });
   
   console.log('Available headers:', Object.keys(headerMap));
 
   const requiredHeaders = {
-    startTime: ["start time", "start time (for filtering)"] as string[],
+    startTime: [
+      "start time",
+      "start time (for filtering)",
+      "hora de início",
+      "hora de inicio"
+    ] as string[],
     role: ["you are a", "role"] as string[],
     university: ["your university", "university"] as string[],
     planning: [
@@ -151,49 +163,52 @@ export async function POST(req: NextRequest) {
   }
 
   const createdRecords = [];
-  for (let i = 2; i <= worksheet.rowCount; i++) {
-    const row = worksheet.getRow(i);
-    if (row.actualCellCount === 0) continue; // skip empty rows
+  for (let i = 1; i < rows.length; i++) {
+    const rowArr = rows[i] as any[];
+    if (!rowArr || rowArr.every((v) => (v === null || v === undefined || String(v).trim() === ""))) continue;
 
     const raw: RawSurveyRow & { startTime: Date | null; memorableMoment?: string } = {
-      startTime: parseExcelDate(row.getCell(colIndex.startTime).value) as Date,
-      role: String(row.getCell(colIndex.role).text).trim(),
-      university: String(row.getCell(colIndex.university).text).trim(),
-      planning: String(row.getCell(colIndex.planning).text).trim(),
-      localStaff: String(row.getCell(colIndex.localStaff).text).trim(),
-      sendingInstitution: String(row.getCell(colIndex.sendingInstitution).text).trim(),
-      accommodationTravel: String(row.getCell(colIndex.accommodationTravel).text).trim(),
-      programme: String(row.getCell(colIndex.programme).text).trim(),
-      culturalTour: colIndex.culturalTour > 0 ? String(row.getCell(colIndex.culturalTour).text).trim() : "",
-      overallSatisfaction: String(row.getCell(colIndex.overallSatisfaction).text).trim(),
-      preparedness: String(row.getCell(colIndex.preparedness).text).trim(),
-      comments: String(row.getCell(colIndex.comments).text).trim(),
-      memorableMoment: colIndex.memorableMoment > 0 ? String(row.getCell(colIndex.memorableMoment).text).trim() : "",
+      startTime: parseExcelDate(rowArr[colIndex.startTime]) as Date,
+      role: String(rowArr[colIndex.role] ?? "").trim(),
+      university: String(rowArr[colIndex.university] ?? "").trim(),
+      planning: String(rowArr[colIndex.planning] ?? "").trim(),
+      localStaff: String(rowArr[colIndex.localStaff] ?? "").trim(),
+      sendingInstitution: String(rowArr[colIndex.sendingInstitution] ?? "").trim(),
+      accommodationTravel: String(rowArr[colIndex.accommodationTravel] ?? "").trim(),
+      programme: String(rowArr[colIndex.programme] ?? "").trim(),
+      culturalTour: colIndex.culturalTour >= 0 ? String(rowArr[colIndex.culturalTour] ?? "").trim() : "",
+      overallSatisfaction: String(rowArr[colIndex.overallSatisfaction] ?? "").trim(),
+      preparedness: String(rowArr[colIndex.preparedness] ?? "").trim(),
+      comments: String(rowArr[colIndex.comments] ?? "").trim(),
+      memorableMoment: colIndex.memorableMoment >= 0 ? String(rowArr[colIndex.memorableMoment] ?? "").trim() : "",
     };
 
     if (!raw.startTime) {
-      console.log(`Row ${i}: No valid start time, skipping`);
+      console.log(`Row ${i + 1}: No valid start time, skipping`);
       continue;
     }
     
-    console.log(`Row ${i}: Processing response with start time: ${raw.startTime}`);
+    console.log(`Row ${i + 1}: Processing response with start time: ${raw.startTime}`);
     
-    // Debug: List all cycles for first row
-    if (i === 2) {
+    // Debug: List all cycles for first row of data
+    if (i === 1) {
       const allCycles = await prisma.eventCycle.findMany({
         select: { id: true, name: true, startDate: true, endDate: true },
       });
       console.log('All available cycles:', allCycles);
     }
     
-    // Find cycleId by date (convert to UTC date-only comparison to handle timezone differences)
-    const responseDate = new Date(Date.UTC(raw.startTime.getFullYear(), raw.startTime.getMonth(), raw.startTime.getDate()));
-    console.log(`Converted ${raw.startTime} to UTC date-only: ${responseDate}`);
-    
+    // Find cycleId by month window (UTC month start to UTC month end) to avoid timezone issues
+    const y = raw.startTime.getUTCFullYear();
+    const m = raw.startTime.getUTCMonth();
+    const monthStart = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0));
+    const monthEnd = new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999));
+    console.log(`Month window for ${raw.startTime}: ${monthStart.toISOString()} - ${monthEnd.toISOString()}`);
+
     const cycle = await prisma.eventCycle.findFirst({
       where: {
-        startDate: { lte: responseDate },
-        endDate: { gte: responseDate },
+        startDate: { lte: monthEnd },
+        endDate: { gte: monthStart },
       },
       select: { id: true, name: true, startDate: true, endDate: true },
     });
@@ -201,21 +216,23 @@ export async function POST(req: NextRequest) {
     console.log(`Found cycle for date ${raw.startTime}:`, cycle);
     
     if (!cycle) {
-      console.log(`Row ${i}: No cycle found for date ${raw.startTime}, skipping`);
+      console.log(`Row ${i + 1}: No cycle found for date ${raw.startTime}, skipping`);
       continue;
     }
 
+    // Use the XLSX row index as a simple sourceId per cycle to avoid duplicates; if your sheet has a stable ID column, map it here instead
+    const sourceId = String(rowArr[headerMap['id']] ?? `${i}`);
     const data = transformRow(raw as RawSurveyRow);
     try {
-      const created = await prisma.evaluationSurveyResponse.create({
-        data: {
-          cycleId: cycle.id,
-          ...data,
-        },
+      const whereUnique: any = { cycleId_sourceId: { cycleId: cycle.id, sourceId } };
+      const upserted = await prisma.evaluationSurveyResponse.upsert({
+        where: whereUnique,
+        update: { ...data },
+        create: { cycleId: cycle.id, ...data, sourceId } as any,
       });
-      createdRecords.push(created.id);
+      createdRecords.push(upserted.id);
     } catch (e) {
-      console.error("Failed to create row", e);
+      console.error("Failed to upsert row", e);
     }
   }
 

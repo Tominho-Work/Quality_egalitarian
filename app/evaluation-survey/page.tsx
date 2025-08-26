@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { ActivityGauge } from '@/components/ui/activity-gauge'
+import { exportElementToPDF } from '@/lib/pdf-export'
 import { WordCloud } from '@/components/ui/word-cloud'
 import { WordData } from '@/lib/text-processing'
+import { OverallTrendChart } from '@/components/ui/overall-trend-chart'
 
 interface AnalyticsData {
   cycles: Array<{
@@ -26,6 +28,7 @@ interface AnalyticsData {
     byCycle: Record<string, number>
   }
   totalResponses: number
+  overallTrend?: Array<{ cycle: string; value: number }>
 }
 
 export default function EvaluationSurveyPage() {
@@ -90,31 +93,44 @@ export default function EvaluationSurveyPage() {
     overallSatisfaction: 'Overall Satisfaction',
   }
 
+  const handleExport = async () => {
+    const container = document.getElementById('evaluation-export-root')
+    if (!container) return
+    await exportElementToPDF(container, {
+      fileName: `evaluation-survey-${selectedCycle}-${selectedRole}-${selectedUniversity}.pdf`,
+      orientation: 'portrait',
+      format: 'a4',
+      marginPt: 24,
+      scale: 2,
+    })
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="min-h-screen bg-[#0b1220] text-slate-100">
+      <div className="container mx-auto px-4 py-8 space-y-8" id="evaluation-export-root">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-blue-200 mb-2">
             Evaluation Survey Analysis
           </h1>
-          <p className="text-gray-600">
+          <p className="text-slate-300">
             EGALITARIAN program participant feedback and satisfaction metrics
           </p>
         </div>
         
-        {/* Filters */}
+        {/* Filters + Export */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
           {/* Cycle Filter */}
           <div className="flex items-center space-x-2">
-            <label htmlFor="cycle-select" className="text-sm font-medium text-gray-700">
+            <label htmlFor="cycle-select" className="text-sm font-medium text-slate-300">
               Cycle:
             </label>
             <select
               id="cycle-select"
               value={selectedCycle}
               onChange={(e) => setSelectedCycle(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+              className="bg-[#0f1b3d] border border-[#1d2b57] text-slate-100 rounded-md px-3 py-2 text-sm"
             >
               <option value="all">All Cycles</option>
               {data.cycles.map((cycle) => (
@@ -127,14 +143,14 @@ export default function EvaluationSurveyPage() {
 
           {/* Role Filter */}
           <div className="flex items-center space-x-2">
-            <label htmlFor="role-select" className="text-sm font-medium text-gray-700">
+            <label htmlFor="role-select" className="text-sm font-medium text-slate-300">
               Role:
             </label>
             <select
               id="role-select"
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+              className="bg-[#0f1b3d] border border-[#1d2b57] text-slate-100 rounded-md px-3 py-2 text-sm"
             >
               <option value="all">All Roles</option>
               {(data.roles || []).map((role) => (
@@ -147,14 +163,14 @@ export default function EvaluationSurveyPage() {
 
           {/* University Filter */}
           <div className="flex items-center space-x-2">
-            <label htmlFor="university-select" className="text-sm font-medium text-gray-700">
+            <label htmlFor="university-select" className="text-sm font-medium text-slate-300">
               University:
             </label>
             <select
               id="university-select"
               value={selectedUniversity}
               onChange={(e) => setSelectedUniversity(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+              className="bg-[#0f1b3d] border border-[#1d2b57] text-slate-100 rounded-md px-3 py-2 text-sm"
             >
               <option value="all">All Universities</option>
               {(data.universities || []).map((university) => (
@@ -164,31 +180,37 @@ export default function EvaluationSurveyPage() {
               ))}
             </select>
           </div>
+          <button
+            onClick={handleExport}
+            className="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Export PDF
+          </button>
         </div>
       </div>
 
       {/* Summary Stats */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Summary</h2>
+      <div className="bg-[#0f1b3d] rounded-lg shadow-sm border border-[#1d2b57] p-6">
+        <h2 className="text-lg font-semibold text-blue-200 mb-4">Summary</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{data.totalResponses}</div>
-            <div className="text-sm text-gray-500">Total Responses</div>
+            <div className="text-2xl font-bold text-blue-300">{data.totalResponses}</div>
+            <div className="text-sm text-slate-300">Total Responses</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{data.metrics.overallSatisfaction.value}</div>
-            <div className="text-sm text-gray-500">Avg Satisfaction (Target: 4.4)</div>
+            <div className="text-2xl font-bold text-emerald-300">{data.metrics.overallSatisfaction.value}</div>
+            <div className="text-sm text-slate-300">Avg Satisfaction (Target: 4.0)</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{data.metrics.preparedness.value}</div>
-            <div className="text-sm text-gray-500">Avg Preparedness (Target: 4.4)</div>
+            <div className="text-2xl font-bold text-purple-300">{data.metrics.preparedness.value}</div>
+            <div className="text-sm text-slate-300">Avg Preparedness (Target: 4.0)</div>
           </div>
         </div>
       </div>
 
       {/* KPI Gauges */}
       <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Key Performance Indicators</h2>
+        <h2 className="text-xl font-semibold text-blue-200 mb-6">Key Performance Indicators</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="metric-card">
             <ActivityGauge
@@ -198,7 +220,7 @@ export default function EvaluationSurveyPage() {
               unit="score"
               size="lg"
             />
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-gray-900 font-semibold mt-2 text-center">
               Average of questions 2-8 • {data.metrics.overallSatisfaction.count} responses
             </p>
           </div>
@@ -210,7 +232,7 @@ export default function EvaluationSurveyPage() {
               unit="score"
               size="lg"
             />
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-gray-900 font-semibold mt-2 text-center">
               How prepared participants felt • {data.metrics.preparedness.count} responses
             </p>
           </div>
@@ -219,23 +241,23 @@ export default function EvaluationSurveyPage() {
 
       {/* Detailed Question Breakdown */}
       <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Question Breakdown</h2>
+        <h2 className="text-xl font-semibold text-blue-200 mb-6">Question Breakdown</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(data.questionAverages)
             .filter(([question, value]) => value > 0) // Only show questions with data
             .map(([question, value]) => (
-            <div key={question} className="bg-white rounded-lg shadow-sm border p-4">
-              <h3 className="font-medium text-gray-900 mb-2">{questionLabels[question] || question}</h3>
+            <div key={question} className="bg-[#0f1b3d] rounded-lg shadow-sm border border-[#1d2b57] p-4">
+              <h3 className="font-medium text-blue-200 mb-2">{questionLabels[question] || question}</h3>
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-blue-600">
+                <span className="text-2xl font-bold text-blue-300">
                   {Math.round(value * 100) / 100}
                 </span>
                 <div className={`px-2 py-1 rounded text-xs font-medium ${
-                  value >= 4.4 ? 'bg-green-100 text-green-800' : 
-                  value >= 4.0 ? 'bg-yellow-100 text-yellow-800' : 
-                  'bg-red-100 text-red-800'
+                  value >= 4.0 ? 'bg-emerald-600/20 text-emerald-200 border border-emerald-600/30' : 
+                  value >= 3.5 ? 'bg-yellow-600/20 text-yellow-200 border border-yellow-600/30' : 
+                  'bg-red-600/20 text-red-200 border border-red-600/30'
                 }`}>
-                  {value >= 4.4 ? 'Excellent' : value >= 4.0 ? 'Good' : 'Needs Improvement'}
+                  {value >= 4.0 ? 'Excellent' : value >= 3.5 ? 'Good' : 'Needs Improvement'}
                 </div>
               </div>
             </div>
@@ -245,39 +267,39 @@ export default function EvaluationSurveyPage() {
 
       {/* Demographics */}
       <div className="mb-12">
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Demographics</h2>
+        <h2 className="text-xl font-semibold text-blue-200 mb-6">Demographics</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="metric-card">
-            <h3 className="font-medium text-gray-900 mb-4">By Role</h3>
+            <h3 className="font-medium text-blue-200 mb-4">By Role</h3>
             <div className="space-y-2">
               {Object.entries(data.demographics.byRole).map(([role, count]) => (
                 <div key={role} className="flex justify-between">
-                  <span className="text-sm text-gray-600">{role}</span>
-                  <span className="text-sm font-medium">{count}</span>
+                  <span className="text-sm text-gray-900">{role}</span>
+                  <span className="text-sm font-bold text-gray-900">{count}</span>
                 </div>
               ))}
             </div>
           </div>
           
           <div className="metric-card">
-            <h3 className="font-medium text-gray-900 mb-4">By University</h3>
+            <h3 className="font-medium text-blue-200 mb-4">By University</h3>
             <div className="space-y-2">
               {Object.entries(data.demographics.byUniversity).map(([university, count]) => (
                 <div key={university} className="flex justify-between">
-                  <span className="text-sm text-gray-600">{university}</span>
-                  <span className="text-sm font-medium">{count}</span>
+                  <span className="text-sm text-gray-900">{university}</span>
+                  <span className="text-sm font-bold text-gray-900">{count}</span>
                 </div>
               ))}
             </div>
           </div>
           
           <div className="metric-card">
-            <h3 className="font-medium text-gray-900 mb-4">By Cycle</h3>
+            <h3 className="font-medium text-blue-200 mb-4">By Cycle</h3>
             <div className="space-y-2">
               {Object.entries(data.demographics.byCycle).map(([cycle, count]) => (
                 <div key={cycle} className="flex justify-between">
-                  <span className="text-sm text-gray-600">{cycle}</span>
-                  <span className="text-sm font-medium">{count}</span>
+                  <span className="text-sm text-gray-900">{cycle}</span>
+                  <span className="text-sm font-bold text-gray-900">{count}</span>
                 </div>
               ))}
             </div>
@@ -288,7 +310,7 @@ export default function EvaluationSurveyPage() {
       {/* Comments Word Cloud */}
       {data.wordCloudData.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">Comments Analysis</h2>
+          <h2 className="text-xl font-semibold text-blue-200 mb-6">Comments Analysis</h2>
           <div className="metric-card">
             <WordCloud 
               words={data.wordCloudData}
@@ -300,11 +322,19 @@ export default function EvaluationSurveyPage() {
         </div>
       )}
 
+      {/* Overall Score Trend by Cycle (ignores cycle filter) */}
+      <div className="mb-12">
+        <h2 className="text-xl font-semibold text-blue-200 mb-6">Overall Score Trend by Cycle</h2>
+        <div className="bg-[#0f1b3d] rounded-lg shadow-sm border border-[#1d2b57] p-4">
+          <OverallTrendChart data={data.overallTrend || []} label="Overall satisfaction" />
+        </div>
+      </div>
+
       {/* Navigation */}
-      <div className="flex justify-between items-center pt-8 border-t">
+      <div className="flex justify-between items-center pt-8 border-t border-[#1d2b57]">
         <a 
           href="/" 
-          className="px-4 py-2 text-blue-600 hover:text-blue-800 hover:underline"
+          className="px-4 py-2 text-blue-300 hover:text-blue-200 hover:underline"
         >
           ← Back to Dashboard
         </a>
@@ -314,6 +344,7 @@ export default function EvaluationSurveyPage() {
         >
           Import More Data
         </a>
+      </div>
       </div>
     </div>
   )
